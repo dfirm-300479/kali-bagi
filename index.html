@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EEF5F2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1C1B" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kali Bagi">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Kali dan Bagi Kelereng</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+html,body{margin:0}
+:root{color-scheme:light;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+[hidden]{display:none!important}
+img{max-width:100%}
+
+/* Konsep: satu tugas per layar, kartu besar, tombol besar.
+   Setiap kantong punya warna sendiri supaya anak bisa melihat kelompoknya. */
+:root{
+  --bg:#EEF5F2; --surface:#FFFFFF; --ink:#12302E; --muted:#4F6B67; --line:#CFE0DA;
+  --accent:#0B7F73; --accent-ink:#FFFFFF; --soft:#DDF0EA;
+  --c1:#E4572E; --c2:#2E86DE; --c3:#E09B00; --c4:#8E44AD; --c5:#17A589; --c6:#D6336C;
+  --good:#11662F; --good-bg:#DDF4E4; --warn:#8A5000; --warn-bg:#FFF0D1;
+  --font-display:"Baloo 2", ui-rounded, "Arial Rounded MT Bold", system-ui, sans-serif;
+  --font-body:"Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1C1B; --surface:#162826; --ink:#E7F3F0; --muted:#9DB8B3; --line:#2A4440;
+    --accent:#35C2B1; --accent-ink:#06201D; --soft:#1C3633;
+    --c1:#FF7A55; --c2:#5BA8F5; --c3:#FFC53D; --c4:#B97FD6; --c5:#3FD1B6; --c6:#F06595;
+    --good:#5FD38A; --good-bg:#173A25; --warn:#FFC766; --warn-bg:#3A2B0B;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1C1B; --surface:#162826; --ink:#E7F3F0; --muted:#9DB8B3; --line:#2A4440;
+  --accent:#35C2B1; --accent-ink:#06201D; --soft:#1C3633;
+  --c1:#FF7A55; --c2:#5BA8F5; --c3:#FFC53D; --c4:#B97FD6; --c5:#3FD1B6; --c6:#F06595;
+  --good:#5FD38A; --good-bg:#173A25; --warn:#FFC766; --warn-bg:#3A2B0B;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.55}
+p{margin:0}
+h1,h2{font-family:var(--font-display);margin:0;text-wrap:balance}
+button{font-family:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.app{max-width:720px;margin-inline:auto;padding-inline:16px;padding-block:20px 40px;display:grid;gap:16px}
+.top{display:grid;gap:4px}
+.eyebrow{font-size:.78rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font-weight:800;font-size:clamp(1.9rem,8vw,2.8rem);line-height:1.05}
+.lead{color:var(--muted);max-width:60ch}
+
+.tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.tab{font:700 .8rem var(--font-body);min-height:46px;padding:6px 0;border-radius:14px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;transition:background .15s}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+.panel{display:grid;gap:14px;min-width:0}
+.card{background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:16px;display:grid;gap:14px;min-width:0}
+h2{font-size:1.35rem;line-height:1.2;font-weight:700}
+.say{color:var(--muted)}
+.note{background:var(--soft);border-radius:14px;padding:12px 14px}
+.lbl{font-weight:700;font-size:.9rem;color:var(--muted);margin-bottom:6px}
+
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stepper{display:grid;gap:6px;min-width:0}
+.stepper-label{font-weight:700;font-size:.9rem;color:var(--muted)}
+.stepper-ctrl{display:grid;grid-template-columns:52px minmax(0,1fr) 52px;align-items:center;gap:8px}
+.step-btn{min-height:52px;border-radius:14px;border:2px solid var(--accent);background:var(--surface);color:var(--accent);font:800 1.6rem var(--font-display);cursor:pointer;line-height:1}
+.step-btn:disabled{opacity:.35;cursor:default}
+.step-val{font:800 2rem var(--font-display);text-align:center;font-variant-numeric:tabular-nums}
+
+.visual{display:flex;flex-wrap:wrap;gap:10px;--d:18px}
+.bag{border:3px solid var(--bc);border-radius:18px;padding:8px;display:grid;gap:6px;background:var(--surface);align-content:start}
+.bag-label{font-size:.75rem;font-weight:800;color:var(--muted)}
+.bag-dots{display:grid;grid-template-columns:repeat(var(--cols,5),var(--d,18px));gap:4px;min-height:var(--d,18px)}
+.dot{width:var(--d,18px);height:var(--d,18px);border-radius:50%;background:var(--dc);box-shadow:inset 0 -3px 0 rgba(0,0,0,.18),inset 0 2px 0 rgba(255,255,255,.35)}
+.array{display:grid;grid-template-columns:repeat(var(--cols,4),var(--d,28px));gap:6px;justify-content:start}
+
+.eq{font-family:var(--font-display);font-weight:800;font-size:clamp(1.5rem,6.5vw,2.3rem);line-height:1.2;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px}
+.btn{min-height:50px;padding:10px 20px;border-radius:14px;border:2px solid var(--accent);background:var(--accent);color:var(--accent-ink);font:800 1rem var(--font-body);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.seg button{min-height:48px;border-radius:14px;border:2px solid var(--line);background:var(--surface);color:var(--ink);font:700 1rem var(--font-body);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{width:50px;height:50px;border-radius:50%;border:2px solid var(--line);background:var(--surface);color:var(--ink);font:800 1.1rem var(--font-display);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+.q-top{display:flex;justify-content:space-between;gap:8px;font-weight:700;color:var(--muted)}
+.bar{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px}
+.bar i{height:8px;border-radius:4px;background:var(--line)}
+.bar i.ok{background:var(--good)}
+.bar i.no{background:var(--warn)}
+.bar i.now{background:var(--accent)}
+.question{font-family:var(--font-display);font-weight:800;font-size:clamp(2.4rem,12vw,3.6rem);line-height:1.1;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.answer-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.ans{width:8rem;max-width:100%;min-height:60px;font:800 2rem var(--font-display);text-align:center;border:3px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink)}
+.ans:focus{border-color:var(--accent)}
+.fb{border-radius:14px;padding:12px 14px;font-weight:700}
+.fb.good{background:var(--good-bg);color:var(--good)}
+.fb.warn{background:var(--warn-bg);color:var(--warn)}
+.fb.info{background:var(--soft);color:var(--ink)}
+.facts{display:flex;flex-wrap:wrap;gap:8px}
+.fact{background:var(--soft);border-radius:999px;padding:4px 12px;font-family:var(--font-display);font-weight:700;font-variant-numeric:tabular-nums}
+
+.tgrid{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:3px}
+.tgrid button,.tcorner{aspect-ratio:1;min-width:0;padding:0;border-radius:8px;border:0;font:700 .78rem var(--font-body);display:grid;place-items:center}
+.tcell{background:var(--bg);color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums}
+.tcell.on{background:var(--soft)}
+.tcell.sel{background:var(--accent);color:var(--accent-ink)}
+.thead{background:var(--surface);color:var(--accent);border:2px solid var(--line)!important;cursor:pointer;font-family:var(--font-display)!important;font-size:.9rem!important}
+.thead.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)!important}
+.tcorner{color:var(--muted)}
+
+.parents{background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:14px 16px}
+.parents summary{font-weight:800;cursor:pointer}
+.parents ul{margin:10px 0 0;padding-left:1.2rem;display:grid;gap:6px}
+
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <p class="eyebrow">Kelas 3 · Perkalian dan pembagian</p>
+    <h1>Kali dan Bagi Kelereng</h1>
+    <p class="lead">Lihat dulu, hitung kemudian. Setiap soal punya gambar kelerengnya.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Pilih bagian">
+    <button class="tab" role="tab" id="tab-kelompok" data-panel="p-kelompok" aria-controls="p-kelompok" aria-selected="true">Kelompok</button>
+    <button class="tab" role="tab" id="tab-susunan" data-panel="p-susunan" aria-controls="p-susunan" aria-selected="false" tabindex="-1">Susunan</button>
+    <button class="tab" role="tab" id="tab-bagi" data-panel="p-bagi" aria-controls="p-bagi" aria-selected="false" tabindex="-1">Bagi</button>
+    <button class="tab" role="tab" id="tab-latihan" data-panel="p-latihan" aria-controls="p-latihan" aria-selected="false" tabindex="-1">Latihan</button>
+    <button class="tab" role="tab" id="tab-tabel" data-panel="p-tabel" aria-controls="p-tabel" aria-selected="false" tabindex="-1">Tabel</button>
+  </div>
+
+  <section class="panel" id="p-kelompok" role="tabpanel" aria-labelledby="tab-kelompok">
+    <div class="card">
+      <h2>Perkalian itu kelompok yang sama banyak</h2>
+      <p>Ada beberapa kantong. Setiap kantong isinya sama banyak. Ubah angkanya dan lihat kelerengnya.</p>
+      <div class="controls" id="k-controls"></div>
+      <div class="visual" id="k-visual" role="img"></div>
+      <div class="eq" id="k-eq"></div>
+      <p class="say" id="k-say"></p>
+    </div>
+    <div class="note"><strong>Cara membaca:</strong> 3 × 4 dibaca “3 kali 4”. Artinya ada 3 kantong, tiap kantong berisi 4 kelereng.</div>
+  </section>
+
+  <section class="panel" id="p-susunan" role="tabpanel" aria-labelledby="tab-susunan" hidden>
+    <div class="card">
+      <h2>Susunan baris dan kolom</h2>
+      <p>Kelereng yang sama bisa disusun rapi. Putar susunannya. Jumlahnya tetap sama.</p>
+      <div class="controls" id="s-controls"></div>
+      <div class="array" id="s-array" role="img"></div>
+      <div class="eq" id="s-eq"></div>
+      <p class="say" id="s-say"></p>
+      <div class="btn-row"><button class="btn" id="s-rotate" type="button">Putar susunan</button></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-bagi" role="tabpanel" aria-labelledby="tab-bagi" hidden>
+    <div class="card">
+      <h2>Pembagian itu berbagi rata</h2>
+      <p>Kelereng dibagikan satu-satu ke setiap anak sampai habis. Setiap anak harus dapat sama banyak.</p>
+      <div class="controls" id="d-controls"></div>
+      <div class="visual" id="d-visual" style="--d:16px"></div>
+      <div class="eq" id="d-eq" role="status" aria-live="polite"></div>
+      <p class="say" id="d-say"></p>
+      <div class="btn-row"><button class="btn" id="d-deal" type="button">Bagikan satu-satu</button></div>
+    </div>
+    <div class="note"><strong>Ingat:</strong> bagi dan kali saling berkebalikan. Kalau 3 × 4 = 12, maka 12 ÷ 3 = 4 dan 12 ÷ 4 = 3.</div>
+  </section>
+
+  <section class="panel" id="p-latihan" role="tabpanel" aria-labelledby="tab-latihan" hidden>
+    <div class="card" id="l-setup">
+      <h2>Latihan 10 soal</h2>
+      <p>Pilih jenis soal dan tabel yang mau dilatih. Mulai dari tabel yang paling mudah.</p>
+      <div>
+        <div class="lbl">Jenis soal</div>
+        <div class="seg" id="l-mode">
+          <button type="button" data-mode="kali" aria-pressed="true">Kali</button>
+          <button type="button" data-mode="bagi" aria-pressed="false">Bagi</button>
+          <button type="button" data-mode="campur" aria-pressed="false">Campur</button>
+        </div>
+      </div>
+      <div>
+        <div class="lbl">Tabel yang dilatih</div>
+        <div class="chips" id="l-tables"></div>
+      </div>
+      <p class="say" id="l-best"></p>
+      <div class="btn-row"><button class="btn" id="l-start" type="button">Mulai</button></div>
+    </div>
+
+    <div class="card" id="l-quiz" hidden>
+      <div class="q-top"><span id="q-count"></span><span id="q-score"></span></div>
+      <div class="bar" id="q-bar"></div>
+      <div class="question" id="q-text"></div>
+      <p class="say" id="q-say"></p>
+      <div class="answer-row">
+        <input id="q-input" class="ans" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="3" aria-label="Jawabanmu">
+        <button class="btn" id="q-check" type="button">Periksa</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn ghost" id="q-hint-btn" type="button">Lihat petunjuk</button>
+        <button class="btn" id="q-next" type="button" hidden>Lanjut</button>
+      </div>
+      <div class="fb" id="q-fb" role="status" aria-live="polite" hidden></div>
+      <div id="q-hint" hidden></div>
+      <div class="facts" id="q-facts" hidden></div>
+    </div>
+
+    <div class="card" id="l-end" hidden>
+      <h2 id="e-title"></h2>
+      <div class="eq" id="e-score"></div>
+      <p id="e-msg"></p>
+      <div class="btn-row">
+        <button class="btn" id="e-again" type="button">Main lagi</button>
+        <button class="btn ghost" id="e-change" type="button">Ubah pilihan</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-tabel" role="tabpanel" aria-labelledby="tab-tabel" hidden>
+    <div class="card">
+      <h2>Tabel perkalian</h2>
+      <p>Sentuh satu kotak untuk melihat perkaliannya. Sentuh angka di pinggir untuk melihat satu tabel.</p>
+      <div class="tgrid" id="t-grid"></div>
+      <div class="eq" id="t-eq" role="status" aria-live="polite"></div>
+      <p class="say" id="t-say"></p>
+    </div>
+  </section>
+
+  <details class="parents">
+    <summary>Untuk orang tua</summary>
+    <ul>
+      <li>Mulai dari benda nyata di rumah, misalnya kelereng, sendok, atau kancing. Layar dipakai sesudahnya.</li>
+      <li>Satu tabel per minggu. Urutan yang biasa dipakai: 2, 10, 5, 3, 4, 6, 7, 8, 9.</li>
+      <li>Latihan 5 sampai 10 menit setiap hari lebih baik daripada satu jam sekali.</li>
+      <li>Kalau anak salah, minta ia menggambar kantongnya atau memakai tombol petunjuk, lalu coba lagi.</li>
+    </ul>
+  </details>
+</main>
+
+<script>
+(function(){
+'use strict';
+var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var COLORS=['--c1','--c2','--c3','--c4','--c5','--c6'];
+
+function $(id){return document.getElementById(id);}
+function h(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
+function clear(n){while(n.firstChild)n.removeChild(n.firstChild);}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function dot(color){var d=h('span','dot');d.style.setProperty('--dc','var('+color+')');return d;}
+function bag(count,color,label,cols){
+  var b=h('div','bag');
+  b.style.setProperty('--bc','var('+color+')');
+  if(label)b.appendChild(h('span','bag-label',label));
+  var g=h('div','bag-dots');
+  g.style.setProperty('--cols',Math.min(Math.max(count,1),cols||5));
+  for(var i=0;i<count;i++)g.appendChild(dot(color));
+  b.appendChild(g);
+  return b;
+}
+function stepper(opts){
+  var wrap=h('div','stepper');
+  var ctrl=h('div','stepper-ctrl');
+  var minus=h('button','step-btn','−');minus.type='button';minus.setAttribute('aria-label','Kurangi '+opts.label);
+  var plus=h('button','step-btn','+');plus.type='button';plus.setAttribute('aria-label','Tambah '+opts.label);
+  var out=h('output','step-val');
+  var v=opts.value;
+  function sync(){out.textContent=v;minus.disabled=v<=opts.min;plus.disabled=v>=opts.max;}
+  minus.addEventListener('click',function(){if(v>opts.min){v--;sync();opts.onChange(v);}});
+  plus.addEventListener('click',function(){if(v<opts.max){v++;sync();opts.onChange(v);}});
+  ctrl.appendChild(minus);ctrl.appendChild(out);ctrl.appendChild(plus);
+  wrap.appendChild(h('span','stepper-label',opts.label));
+  wrap.appendChild(ctrl);
+  sync();
+  return {el:wrap,get:function(){return v;},set:function(n){v=n;sync();}};
+}
+function factsFor(a,b){
+  var p=a*b,f=[a+' × '+b+' = '+p];
+  if(a!==b)f.push(b+' × '+a+' = '+p);
+  f.push(p+' ÷ '+a+' = '+b);
+  if(a!==b)f.push(p+' ÷ '+b+' = '+a);
+  return f;
+}
+function loadStats(){try{return JSON.parse(localStorage.getItem('kbk-stats')||'{}')||{};}catch(e){return {};}}
+function saveStats(s){try{localStorage.setItem('kbk-stats',JSON.stringify(s));}catch(e){}}
+
+/* Tab */
+var tabs=[].slice.call(document.querySelectorAll('.tab'));
+function showTab(id){
+  tabs.forEach(function(t){
+    var on=t.getAttribute('data-panel')===id;
+    t.setAttribute('aria-selected',on?'true':'false');
+    t.tabIndex=on?0:-1;
+    $(t.getAttribute('data-panel')).hidden=!on;
+  });
+}
+tabs.forEach(function(t,i){
+  t.addEventListener('click',function(){showTab(t.getAttribute('data-panel'));});
+  t.addEventListener('keydown',function(e){
+    var n=-1;
+    if(e.key==='ArrowRight')n=(i+1)%tabs.length;
+    else if(e.key==='ArrowLeft')n=(i+tabs.length-1)%tabs.length;
+    if(n>=0){e.preventDefault();tabs[n].focus();showTab(tabs[n].getAttribute('data-panel'));}
+  });
+});
+
+/* Kelompok */
+var kA=stepper({label:'Banyak kantong',min:1,max:10,value:3,onChange:renderK});
+var kB=stepper({label:'Kelereng tiap kantong',min:1,max:10,value:4,onChange:renderK});
+$('k-controls').appendChild(kA.el);$('k-controls').appendChild(kB.el);
+function renderK(){
+  var a=kA.get(),b=kB.get(),box=$('k-visual'),i;
+  clear(box);
+  for(i=0;i<a;i++)box.appendChild(bag(b,COLORS[i%6],null,5));
+  var parts=[];for(i=0;i<a;i++)parts.push(b);
+  var sum=a>6?b+' + '+b+' + '+b+' + … + '+b:parts.join(' + ');
+  $('k-eq').textContent=a+' × '+b+' = '+(a>1?sum+' = ':'')+(a*b);
+  var say=a+' kantong, tiap kantong '+b+' kelereng. Semuanya '+(a*b)+' kelereng.';
+  if(a>6)say+=' Angka '+b+' ditambahkan '+a+' kali.';
+  $('k-say').textContent=say;
+  box.setAttribute('aria-label',say);
+}
+renderK();
+
+/* Susunan */
+var sR=stepper({label:'Banyak baris',min:1,max:10,value:3,onChange:renderS});
+var sC=stepper({label:'Banyak kolom',min:1,max:10,value:4,onChange:renderS});
+$('s-controls').appendChild(sR.el);$('s-controls').appendChild(sC.el);
+function renderS(){
+  var r=sR.get(),c=sC.get(),box=$('s-array'),i,j;
+  clear(box);
+  box.style.setProperty('--cols',c);
+  box.style.setProperty('--d',(c>6?22:28)+'px');
+  for(i=0;i<r;i++)for(j=0;j<c;j++)box.appendChild(dot(COLORS[i%6]));
+  var p=r*c;
+  $('s-eq').textContent=r+' × '+c+' = '+p;
+  var say=r+' baris, tiap baris '+c+' kelereng.';
+  if(r!==c)say+=' Kalau diputar: '+c+' baris, tiap baris '+r+' kelereng, '+c+' × '+r+' = '+p+'. Jumlahnya sama.';
+  else say+=' Diputar pun bentuknya sama.';
+  $('s-say').textContent=say;
+  box.setAttribute('aria-label',say);
+}
+$('s-rotate').addEventListener('click',function(){var r=sR.get(),c=sC.get();sR.set(c);sC.set(r);renderS();});
+renderS();
+
+/* Bagi */
+var timer=null;
+function stopDeal(){if(timer){clearInterval(timer);timer=null;}}
+function maxDealt(){return Math.floor(dT.get()/dN.get())*dN.get();}
+var dT=stepper({label:'Banyak kelereng',min:2,max:40,value:12,onChange:function(){stopDeal();renderD(maxDealt());}});
+var dN=stepper({label:'Banyak anak',min:2,max:10,value:3,onChange:function(){stopDeal();renderD(maxDealt());}});
+$('d-controls').appendChild(dT.el);$('d-controls').appendChild(dN.el);
+function renderD(k){
+  var t=dT.get(),n=dN.get(),max=maxDealt(),box=$('d-visual'),i;
+  clear(box);
+  var rem=t-k,done=k>=max;
+  if(rem>0)box.appendChild(bag(rem,'--muted',done?'Sisa':'Tumpukan',5));
+  for(i=0;i<n;i++){
+    var cnt=Math.floor(k/n)+(i<k%n?1:0);
+    box.appendChild(bag(cnt,COLORS[i%6],'Anak '+(i+1),5));
+  }
+  var eq=$('d-eq'),say=$('d-say');
+  if(max===0){
+    eq.textContent=t+' ÷ '+n+' = ?';
+    say.textContent='Kelerengnya kurang. Setiap anak belum bisa dapat satu. Tambah kelerengnya.';
+    return;
+  }
+  if(!done){eq.textContent=t+' ÷ '+n+' = …';say.textContent='Membagikan satu-satu…';return;}
+  var q=max/n;
+  if(rem===0){
+    eq.textContent=t+' ÷ '+n+' = '+q;
+    say.textContent='Setiap anak dapat '+q+' kelereng. Cek dengan perkalian: '+n+' × '+q+' = '+t+'.';
+  }else{
+    eq.textContent=t+' ÷ '+n+' = '+q+' sisa '+rem;
+    say.textContent='Setiap anak dapat '+q+' kelereng. Sisa '+rem+' tidak cukup untuk dibagi lagi.';
+  }
+}
+function deal(){
+  stopDeal();
+  var max=maxDealt();
+  if(reduce||max===0){renderD(max);return;}
+  var k=0;
+  renderD(0);
+  timer=setInterval(function(){
+    k++;renderD(k);
+    if(k>=max)stopDeal();
+  },Math.max(60,Math.min(180,2400/max)));
+}
+$('d-deal').addEventListener('click',deal);
+renderD(maxDealt());
+
+/* Tabel */
+var tState={mode:'cell',r:3,c:4,t:0};
+function headBtn(n){
+  var b=h('button','thead',String(n));
+  b.type='button';
+  b.setAttribute('aria-label','Tabel '+n);
+  if(tState.mode==='table'&&tState.t===n)b.className+=' on';
+  if(tState.mode==='cell'&&(tState.r===n||tState.c===n))b.className+=' on';
+  b.addEventListener('click',function(){tState={mode:'table',r:0,c:0,t:n};renderT();});
+  return b;
+}
+function renderT(){
+  var g=$('t-grid'),r,c;
+  clear(g);
+  g.appendChild(h('div','tcorner','×'));
+  for(c=1;c<=10;c++)g.appendChild(headBtn(c));
+  for(r=1;r<=10;r++){
+    g.appendChild(headBtn(r));
+    for(c=1;c<=10;c++){
+      (function(r,c){
+        var b=h('button','tcell',String(r*c));
+        b.type='button';
+        b.setAttribute('aria-label',r+' kali '+c+' sama dengan '+(r*c));
+        var on=tState.mode==='table'?(r===tState.t||c===tState.t):(r===tState.r||c===tState.c);
+        if(on)b.className+=' on';
+        if(tState.mode==='cell'&&r===tState.r&&c===tState.c)b.className+=' sel';
+        b.addEventListener('click',function(){tState={mode:'cell',r:r,c:c,t:0};renderT();});
+        g.appendChild(b);
+      })(r,c);
+    }
+  }
+  var eq=$('t-eq'),say=$('t-say');
+  if(tState.mode==='cell'){
+    var p=tState.r*tState.c;
+    eq.textContent=tState.r+' × '+tState.c+' = '+p;
+    say.textContent=tState.r===tState.c?'Kotak ini ada di garis tengah. Kalau diputar, hasilnya tetap '+p+'.':'Kalau diputar: '+tState.c+' × '+tState.r+' = '+p+'. Letaknya di kotak lain, hasilnya sama.';
+  }else{
+    var list=[];for(var k=1;k<=10;k++)list.push(tState.t*k);
+    eq.textContent='Tabel '+tState.t;
+    say.textContent='Hitung loncat '+tState.t+': '+list.join(', ')+'.';
+  }
+}
+renderT();
+
+/* Latihan */
+var stats=loadStats();
+var Q={mode:'kali',tables:[2,5,10],total:10,i:0,correct:0,tries:0,answered:false,cur:null,last:'',marks:[]};
+var hintOpen=false;
+
+function renderSetup(){
+  var chips=$('l-tables');clear(chips);
+  for(var n=2;n<=10;n++){
+    (function(n){
+      var b=h('button','chip',String(n));
+      b.type='button';
+      b.setAttribute('aria-label','Tabel '+n);
+      b.setAttribute('aria-pressed',Q.tables.indexOf(n)>=0?'true':'false');
+      b.addEventListener('click',function(){
+        var idx=Q.tables.indexOf(n);
+        if(idx>=0){if(Q.tables.length>1)Q.tables.splice(idx,1);}
+        else{Q.tables.push(n);Q.tables.sort(function(a,b){return a-b;});}
+        renderSetup();
+      });
+      chips.appendChild(b);
+    })(n);
+  }
+  [].slice.call($('l-mode').querySelectorAll('button')).forEach(function(b){
+    b.setAttribute('aria-pressed',b.getAttribute('data-mode')===Q.mode?'true':'false');
+  });
+  $('l-best').textContent=stats.best!=null?'Skor terbaik: '+stats.best+' dari '+Q.total+'. Sudah main '+(stats.rounds||0)+' kali.':'';
+}
+[].slice.call($('l-mode').querySelectorAll('button')).forEach(function(b){
+  b.addEventListener('click',function(){Q.mode=b.getAttribute('data-mode');renderSetup();});
+});
+
+function makeQ(){
+  var guard=0,q;
+  do{
+    var t=pick(Q.tables),n=1+Math.floor(Math.random()*10);
+    var kind=Q.mode==='campur'?pick(['kali','bagi']):Q.mode;
+    if(kind==='kali'){
+      var swap=Math.random()<0.5;
+      q={kind:'kali',a:swap?n:t,b:swap?t:n};
+      q.ans=q.a*q.b;
+      q.key='kali:'+q.a+'x'+q.b;
+    }else{
+      if(n<2)n=2;
+      var d=t,qt=n;
+      if(Math.random()<0.3){d=n;qt=t;}
+      q={kind:'bagi',d:d,total:d*qt,ans:qt};
+      q.key='bagi:'+q.total+'/'+q.d;
+    }
+    guard++;
+  }while(q.key===Q.last&&guard<20);
+  return q;
+}
+function renderBar(){
+  var bar=$('q-bar');clear(bar);
+  for(var i=0;i<Q.total;i++){
+    var m=h('i',Q.marks[i]||(i===Q.i?'now':''));
+    bar.appendChild(m);
+  }
+}
+function fb(text,type){var f=$('q-fb');f.className='fb '+type;f.textContent=text;f.hidden=false;}
+function showFacts(){
+  var q=Q.cur,box=$('q-facts');clear(box);
+  var list=q.kind==='kali'?factsFor(q.a,q.b):factsFor(q.d,q.ans);
+  list.forEach(function(t){box.appendChild(h('span','fact',t));});
+  box.hidden=false;
+}
+function showHint(){
+  var q=Q.cur,box=$('q-hint'),i;
+  clear(box);
+  if(q.kind==='kali'){
+    var v=h('div','visual');v.style.setProperty('--d','14px');
+    for(i=0;i<q.a;i++)v.appendChild(bag(q.b,COLORS[i%6],null,5));
+    box.appendChild(v);
+  }else{
+    var seq=[];for(i=1;i<=q.ans;i++)seq.push(q.d*i);
+    box.appendChild(h('p','note','Hitung loncat '+q.d+': '+seq.join(', ')+'. Berapa kali kamu meloncat?'));
+  }
+  box.hidden=false;hintOpen=true;
+  $('q-hint-btn').textContent='Tutup petunjuk';
+}
+function hideHint(){$('q-hint').hidden=true;hintOpen=false;$('q-hint-btn').textContent='Lihat petunjuk';}
+
+function nextQ(){
+  var q=makeQ();
+  Q.cur=q;Q.last=q.key;Q.tries=0;Q.answered=false;
+  $('q-count').textContent='Soal '+(Q.i+1)+' dari '+Q.total;
+  $('q-score').textContent='Benar: '+Q.correct;
+  renderBar();
+  $('q-text').textContent=q.kind==='kali'?q.a+' × '+q.b+' = ?':q.total+' ÷ '+q.d+' = ?';
+  $('q-say').textContent=q.kind==='kali'
+    ?q.a+' kantong, tiap kantong '+q.b+' kelereng. Berapa semuanya?'
+    :q.total+' kelereng dibagi rata ke '+q.d+' anak. Tiap anak dapat berapa?';
+  var input=$('q-input');
+  input.value='';input.disabled=false;
+  $('q-fb').hidden=true;$('q-facts').hidden=true;
+  hideHint();
+  $('q-check').hidden=false;$('q-hint-btn').hidden=false;$('q-next').hidden=true;
+  $('q-next').textContent=Q.i===Q.total-1?'Lihat hasil':'Lanjut';
+  input.focus();
+}
+function endTurn(){
+  Q.answered=true;
+  $('q-input').disabled=true;
+  $('q-check').hidden=true;$('q-hint-btn').hidden=true;$('q-next').hidden=false;
+  $('q-score').textContent='Benar: '+Q.correct;
+  renderBar();
+  showFacts();
+  $('q-next').focus();
+}
+function check(){
+  if(Q.answered)return;
+  var raw=$('q-input').value.trim();
+  if(raw===''){fb('Ketik jawabanmu dulu.','info');return;}
+  var v=parseInt(raw,10);
+  if(v===Q.cur.ans){
+    Q.correct++;Q.marks[Q.i]='ok';
+    fb(pick(['Benar! Hebat.','Tepat sekali.','Betul! Terus ya.','Mantap, benar.']),'good');
+    endTurn();
+  }else{
+    Q.tries++;
+    if(Q.tries>=2){
+      Q.marks[Q.i]='no';
+      fb('Jawabannya '+Q.cur.ans+'. Tidak apa-apa. Lihat gambarnya, nanti coba lagi.','warn');
+      showHint();
+      endTurn();
+    }else{
+      fb('Belum tepat. Coba sekali lagi. Tombol petunjuk bisa membantu.','warn');
+      $('q-input').select();
+    }
+  }
+}
+function advance(){
+  Q.i++;
+  if(Q.i>=Q.total)finish();else nextQ();
+}
+function startRound(){
+  Q.i=0;Q.correct=0;Q.marks=[];Q.last='';
+  $('l-setup').hidden=true;$('l-end').hidden=true;$('l-quiz').hidden=false;
+  nextQ();
+}
+function finish(){
+  $('l-quiz').hidden=true;$('l-end').hidden=false;
+  stats.rounds=(stats.rounds||0)+1;
+  var newBest=stats.best==null||Q.correct>stats.best;
+  if(newBest)stats.best=Q.correct;
+  saveStats(stats);
+  $('e-title').textContent=Q.correct>=9?'Hebat sekali!':Q.correct>=6?'Bagus!':'Terus berlatih!';
+  $('e-score').textContent=Q.correct+' dari '+Q.total+' benar';
+  var msg=Q.correct>=9?'Hampir semua benar. Coba tabel yang lain.'
+    :Q.correct>=6?'Latihan sedikit lagi, besok pasti makin lancar.'
+    :'Tidak apa-apa. Lihat dulu tab Kelompok dan Tabel, lalu main lagi.';
+  if(newBest&&stats.rounds>1)msg+=' Ini skor terbaikmu.';
+  $('e-msg').textContent=msg;
+}
+$('l-start').addEventListener('click',startRound);
+$('q-check').addEventListener('click',check);
+$('q-next').addEventListener('click',advance);
+$('q-hint-btn').addEventListener('click',function(){if(hintOpen)hideHint();else showHint();});
+$('q-input').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){e.preventDefault();if(Q.answered)advance();else check();}
+});
+$('q-input').addEventListener('input',function(){this.value=this.value.replace(/[^0-9]/g,'');});
+$('e-again').addEventListener('click',startRound);
+$('e-change').addEventListener('click',function(){
+  $('l-end').hidden=true;$('l-setup').hidden=false;renderSetup();
+});
+renderSetup();
+})();
+</script>
+<script>
+if('serviceWorker' in navigator && location.protocol !== 'file:'){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+</script>
+</body>
+</html>
